@@ -16,7 +16,7 @@ class LinearRegression:
             X = np.c_[np.ones(X.shape[0]),X]
         return X
 
-    def fit(self,X:np.ndarray,Y:np.ndarray,W=None,lr=0.01,iter=1e7):
+    def fit(self,X:np.ndarray,Y:np.ndarray,W=None,lr=0.01,step_num=1e7):
         """
         根据输入参数,自动选择拟合的方法
         当训练样本数量较小的时候(大约1万以下),选择正规方程.超过这个数字选择梯度
@@ -25,13 +25,13 @@ class LinearRegression:
         if W is None:
             self.__normal_equation(X,Y)
         else:
-            self.__gradient_descent(X,Y,W,lr,iter)
+            self.__gradient_descent(X,Y,W,lr,step_num)
 
-    def __gradient_descent(self,X,Y,W,lr,iter):
+    def __gradient_descent(self,X,Y,W,lr,step_num):
         h = 1e-7
         self.W = W
         grad = np.zeros_like(W)
-        for _ in range(int(iter)):
+        for _ in range(int(step_num)):
             for i in range(grad.shape[0]):
                 t = self.W[i]
                 self.W[i] = t + h
