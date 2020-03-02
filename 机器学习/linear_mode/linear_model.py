@@ -3,55 +3,64 @@ import numpy as np
 class LinearRegression:
     def __init__(self,fit_inter=True):
         """
-        线性回归:Y = w0+w1*x1+w2*x2+…………wn*xn
-        其中 w0:intercept,w1~wn:coefficient.
-        这里全部放在W这个ndarray里面
+        Linear Regression: Y = w0+w1*x1+w2*x2+…………wn*xn
+        w0: intercept
+        w1~wn: coefficient
         """
-        self.__inter = fit_inter
-        self.W = None   # 权重参数
+        self.fit_inter = fit_inter
 
-    def __fit_intercept(self,X:np.ndarray)->np.ndarray:
-        """如果线性回归有intercept参数,那么默认输入需要追加一列1来匹配拟合"""
-        if self.__inter:
+    def __intercept_fit(self,X):
+        """截距的使用,调整输入矩阵X"""
+        if self.fit_inter:
             X = np.c_[np.ones(X.shape[0]),X]
         return X
 
-    def fit(self,X:np.ndarray,Y:np.ndarray,W=None,lr=0.01,step_num=1e7):
-        """
-        根据输入参数,自动选择拟合的方法
-        当训练样本数量较小的时候(大约1万以下),选择正规方程.超过这个数字选择梯度
-        下降.因为训练样本较大的时候,正规方程的速度没有梯度下降的速度快
-        """
-        if W is None:
-            self.__normal_equation(X,Y)
-        else:
-            self.__gradient_descent(X,Y,W,lr,step_num)
+    def __weight_set(self,W):
+        """权重参数的设定"""
+        self.intercept_ = W[0] if self.fit_inter else 0.
+        self.coef_ = W[self.fit_inter:]
 
-    def __gradient_descent(self,X,Y,W,lr,step_num):
-        h = 1e-7
+    def __normal_equation(self,X,y):
+        """正规方程求解"""
+        X = self.__intercept_fit(X)
+        self.W = np.linalg.pinv(X.T @ X) @ X.T @ y
+        self.__weight_set(self.W)
+
+    def __mean_square_error(self,X,y):
+        """Cost Function:MSE"""
+        size = X.shape[0]
+        t = self.predict(X)
+        return np.sum((t - y)**2) / size
+
+    def __gradient_descent(self,X,y,W,lr,itercnt):
+        """Gradient Descent"""
+        delta = 1e-7
         self.W = W
         grad = np.zeros_like(W)
-        for _ in range(int(step_num)):
+
+        for cnt in range(int(itercnt)):
             for i in range(grad.shape[0]):
                 t = self.W[i]
-                self.W[i] = t + h
-                f1 = self.__cost_fn(X,Y)
-                self.W[i] = t - h
-                f2 = self.__cost_fn(X,Y)
-                grad[i] = (f1-f2)/(2*h)
+                self.W[i] = t + delta
+                f1 = self.__mean_square_error(X,y)
+                self.W[i] = t - delta
+                f2 = self.__mean_square_error(X,y)
+                grad[i] = (f1-f2)/(2*delta)
                 self.W[i] = t
-            self.W -= lr*grad
+            update = lr*grad
 
-    def __cost_fn(self,X:np.ndarray,Y:np.ndarray):
-        """代价函数"""
-        return np.sum((self.predict(X)-Y)**2) / 2 / X.shape[0]
+            if all(np.abs(update)) < 1e-7 or any(np.abs(update)) > 1e7:
+                self.gradtimes = cnt
+                break
+            self.W -= update
+        self.__weight_set(self.W)
 
-    def __normal_equation(self,X:np.ndarray,Y:np.ndarray):
-        """通过正规方程拟合权重参数"""
-        X = self.__fit_intercept(X)
-        self.W = np.linalg.pinv(X.T @ X) @ X.T @ Y
+    def fit(self,X:np.ndarray,y:np.ndarray,W:np.ndarray=None,lr=0.01,itercnt=1e7):
+        if W is None:
+            self.__normal_equation(X,y)
+        else:
+            self.__gradient_descent(X,y,W,lr,itercnt)
 
-    def predict(self,X:np.ndarray) -> np.ndarray:
-        """推测结果"""
-        X = self.__fit_intercept(X)
-        return X @ self.W
+    def predict(self,X:np.ndarray):
+        """预测输出"""
+        return self.__intercept_fit(X) @ self.W
