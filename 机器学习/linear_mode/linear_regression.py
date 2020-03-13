@@ -48,7 +48,6 @@ class LinearRegression:
             self.W -= update
         self.__weight_set(self.W)
 
-
     def fit(self,X,y,W=None,lr=0.01,itercnt=1e5):
         """拟合参数"""
         if W is None:
