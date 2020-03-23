@@ -13,8 +13,6 @@ UpdateInfo:
     - 所有的更新值都小于1e-7时候,认为已经收敛,结束下降
     - 任意一个更新至大于1e7时候,认为学习率过大,不再进行迭代        
 """
-
-
 import numpy as np
 
 class Linear_Regression:
