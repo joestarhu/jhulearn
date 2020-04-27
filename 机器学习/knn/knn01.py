@@ -4,7 +4,7 @@ class KNN:
     def predict(self,X,y,T,k=3,norm=False,p=2,proba_flg=False):
         if norm:
             ds = np.r_[X,T]
-            min,max = ds.min(),ds.max()
+            min,max = ds.min(axis=0),ds.max(axis=0)
             ds = (ds-min)/(max-min)
             X = ds[:X.shape[0]]
             T = ds[X.shape[0]:]
