@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <style>
+    .el-row {
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .el-col {
+      border-radius: 4px;
+    }
+
+    .bg-purple-dark {
+      background: #99a9bf;
+    }
+
+    .bg-purple {
+      background: #d3dce6;
+    }
+
+    .bg-purple-light {
+      background: #e5e9f2;
+    }
+
+    .grid-content {
+      border-radius: 4px;
+      min-height: 36px;
+    }
+
+    .row-bg {
+      padding: 10px 0;
+      background-color: #f9fafc;
+    }
+
+    .Red {
+      color: red;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app" v-cloak>
+    <el-table :data='order'>
+      <el-table-column type='index'></el-table-column>
+      <el-table-column prop='name' label='书籍名称'>
+        <template slot-scope='scope'>
+          <p>{{scope.row.name | showBookName}}</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop='published' label='出版日期'></el-table-column>
+      <el-table-column prop='price' label='价格'>
+        <template slot-scope='scope'>
+          <p>{{scope.row.price | showPrice}}</p>
+        </template>
+      </el-table-column>
+      <el-table-column prop='num' label='购买数量'>
+        <template slot-scope='scope'>
+          <el-input-number v-model="scope.row.num" :min="1" :max="10" label="描述文字"></el-input-number>
+        </template>
+      </el-table-column>
+      <el-table-column label='操作'>
+        <template slot-scope='scope'>
+          <el-button size='small' type='text' @click='remove(scope.$index)'>移除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <p>总价:{{totalPrice | showPrice}}</p>
+
+    <el-radio v-for='val in order' v-model='ratio' :label='val.name' :key='val.name'>{{val.name}}</el-radio>
+
+    <el-checkbox-group v-model='checkbox'>
+      <el-checkbox v-for='val in order' :label='val.name'></el-checkbox>
+    </el-checkbox-group>
+
+    <el-select placeholder='请选择' v-model='selected'>
+      <el-option v-for='val in order' :key='val.name' :value='val.name'></el-option>
+    </el-select>
+  </div>
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+  <script>
+    let app = new Vue({
+      el: '#app',
+      data: {
+        ratio: '算法导论',
+        selected: '',
+        checkbox: [],
+        order: [{
+            name: '算法导论',
+            published: '2006-9',
+            price: 85,
+            num: 1
+          },
+          {
+            name: 'UNIX编程艺术',
+            published: '2006-2',
+            price: 58,
+            num: 1
+          },
+          {
+            name: '编程珠玑',
+            published: '2008-10',
+            price: 39,
+            num: 1
+          },
+          {
+            name: '代码大全',
+            published: '2006-3',
+            price: 128,
+            num: 1
+          }
+        ]
+      },
+      filters: {
+        // 过滤器 function
+        showBookName: function(val) {
+          return '<<' + val + '>>'
+        },
+        showPrice: function(val) {
+          return '$' + val.toFixed(2)
+        }
+      },
+      computed: {
+        // 计算属性 Function
+        totalPrice: function() {
+          return this.order.reduce((a, b) => a + b.price * b.num, 0)
+        }
+      },
+      methods: {
+        remove: function(idx) {
+          this.order.splice(idx, 1)
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
